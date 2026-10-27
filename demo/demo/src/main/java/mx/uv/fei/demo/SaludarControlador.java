@@ -1,98 +1,107 @@
 package mx.uv.fei.demo;
 
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class SaludarControlador {
-    String nombre;
-    
-    // CORRECCIÓN 1: Declaramos la variable global, pero NO la instanciamos aquí
-    // para evitar el error del constructor vacío.
-    Saludador saludador;   
 
+    String nombre;
+
+    // ruta en sustantivo plural
     @GetMapping("/saludos")
     public String saludar() {
-        return "Hola, mundo!" + nombre;  
+        return "Hola mundo!" + nombre;
     }
 
     @GetMapping("/despedidas")
     public String adios() {
-        return "Adiós, mundo!";
+        return "Adios mundo!";
     }
 
     @PostMapping("/nombramientos")
     public void nombre() {
-        nombre = "Roa";
+        nombre = "Mario";
     }
 
-    // Actualizar el nombre
+    // renombramiento
     @PutMapping("/nombramientos")
     public void met1() {
-        nombre = "Alessandro";
+        nombre = "otro nombre";
     }
 
-    // Eliminar el nombre  
+    // desnombraiento
     @DeleteMapping("/nombramientos")
     public void met2() {
-        nombre = null;  
-    }       
+        nombre = null;
+    }
 
-    @GetMapping("/saludos/{nombre}")
+    @GetMapping("/saludar/{nombre}")
     public Saludador met3(@PathVariable String nombre) {
         System.out.println(nombre);
         return new Saludador(nombre);
     }
 
-    @GetMapping("/saludos2/{nombrex}")
-    public Saludador met4(@PathVariable("nombrex") String nombre) {
+    @GetMapping("/saludar2/{nombreX}")
+    public Saludador met4(@PathVariable("nombreX") String nombre) {
         System.out.println(nombre);
-        return new Saludador(nombre);
+        saludador = new Saludador(nombre);
+        return saludador;
     }
+
+    Saludador saludador;
 
     @PostMapping("/crearSaludador")
-    public String crearSaludador(@RequestBody Saludador objetoSaludador) {
-        // Asignamos el objeto recibido de forma segura a nuestra variable global
-        this.saludador = objetoSaludador;
-        // CORRECCIÓN 2: Accedemos al contenido real usando el método que creaste en la clase Saludador
-        return "Saludador creado con éxito: " + objetoSaludador.getContenido();
+    public String crearSaludador(@RequestBody Saludador nombre) {
+        saludador = nombre;
+        return "Saludador creado: " + nombre;
     }
 
-    @PostMapping("/obtenerSaludador")
-    public Saludador obtenerSaludador(@RequestBody String nombre) {
-        return new Saludador(nombre);
+    @GetMapping("/obtenerSaludador")
+    public Saludador obtenerSaludador() {
+        return saludador;
     }
 
-    //agregar metodo que mapee raiz
+    // agregar un método que mapee raíz (/)
     @RequestMapping("/")
     public String raiz() {
-    String contenido = null;
-    contenido = """
-    <h1>Menu de opciones</h1>
-    <ul>
-        <li><a href="/saludos">Saludar</a></li>
-        <li><a href="/despedidas">Despedirse</a></li>
-        <li><a href="/nombramientos">Nombrar</a></li>
-        <li><a href="/saludos/{nombre}">Saludar con nombre</a></li>
-        <li><a href="/saludos2/{nombrex}">Saludar con nombrex</a></li>
-        <li><a href="/crearSaludador/{nombre}">Crear Saludador</a></li>
-        <li><a href="/obtenerSaludador">/saludar/{nombre}">Obtener Saludador</a></li>
-
-    """;
-    return contenido;
+        String contenido = null;
+        contenido = """
+                <h1> Menú de opciones </h1>
+                <ul>
+                    <li> <a href='/saludos'>/saludos</a></li>
+                    <li> <a href='/despedidas'>/despedidas</a></li>
+                    <li> /nombramientos (P|P|D) </li>
+                    <li> <a href='/saludar/default'>/saludar/{nombre}</a></li>
+                    <li> <a href='/saludar2/default2'>/saludar2/{nombreX}</a></li>
+                    <li> /crearSaludador (Post - json) </li>
+                    <li> <a href='/obtenerSaludador'>/obtenerSaludador</a></li>
+                    <li> <a href='/query1'>/query1?nombre=valor&paterno=valor2[&materno=valor3]</a></li>
+                    <li> <a href='/query2'>/query2[?nombre=valor]</a></li>
+                </ul>
+                        """;
+        return contenido;
     }
 
     @GetMapping("/query1")
-    public String query1(@RequestParam String nombre,
-        @RequestParam String paterno,
-        @RequestParam(defaultValue = "")String materno){
-             System.out.printline(nombre);
-             return nombre + " " + paterno + " " + materno;
+    public String query1(@RequestParam String nombre, 
+        @RequestParam String paterno, 
+        @RequestParam(defaultValue = "") String materno){
+        System.out.println(nombre);
+        return nombre + " " + paterno + " " + materno;
     }
+
+    @GetMapping("/query2")
+    public String query2(@RequestParam(defaultValue = "default") String nombre){
+        System.out.println(nombre);
+        return nombre;
+    }
+
 }
